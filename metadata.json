@@ -1,0 +1,7 @@
+{
+  "name": "App_creativity_24_9_68",
+  "description": "Example React app using Gemini",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
