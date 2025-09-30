@@ -883,12 +883,16 @@ const CreativeCorner = ({ onGoHome, savedIdeas, setSavedIdeas, user, userSetting
               </div>
               <div className="space-y-4">
                 {activeIdeaForScript.script.map((scene, index) => (
-                  <div key={index} className={`bg-slate-800/50 p-4 rounded-xl transition-all duration-300 ${playingSceneIndex === index ? 'bg-cyan-900/50 ring-2 ring-cyan-500 shadow-lg shadow-cyan-500/20' : 'border border-transparent hover:border-slate-600'}`}>
+                  <div key={index} className={`bg-slate-800/50 p-4 rounded-xl transition-all duration-300 ${playingSceneIndex === index ? 'bg-cyan-900/50 ring-2 ring-cyan-500 shadow-lg shadow-cyan-500/20' : 'border border-slate-700'}`}>
                     <div className="flex justify-between items-start gap-4">
                       <div>
-                        <h4 className="text-lg font-bold text-cyan-400">
-                          Scene Shot: {scene.scene} / {scene.shot}
+                        <h4 className="text-lg font-bold text-cyan-400 tracking-wide">
+                          SCENE {scene.scene}
                         </h4>
+                        <div className="mt-1 text-xs font-mono text-slate-400 space-x-2">
+                          <span className="bg-slate-700/50 px-2 py-1 rounded">SHOT: {scene.shot}</span>
+                          <span className="bg-slate-700/50 px-2 py-1 rounded">TIME: {scene.approxDuration}</span>
+                        </div>
                       </div>
                       {'speechSynthesis' in window && (
                         <button onClick={() => handlePlayAudio(scene, index)} className="flex-shrink-0 text-slate-300 hover:text-cyan-400 transition p-2 rounded-full" aria-label={playingSceneIndex === index ? `Stop playing audio for scene ${scene.scene}` : `Play audio for scene ${scene.scene}`}>
@@ -904,27 +908,44 @@ const CreativeCorner = ({ onGoHome, savedIdeas, setSavedIdeas, user, userSetting
                         </button>
                       )}
                     </div>
-                    <div className="mt-4 border-t border-slate-600 pt-4 grid grid-cols-1 md:grid-cols-3 gap-x-6 gap-y-4 text-sm">
-                        <div className="space-y-1">
-                            <p className="font-semibold text-slate-300">Camera Angle:</p>
-                            <p className="text-slate-400">{scene.cameraAngle}</p>
+                    <div className="mt-4 border-t border-slate-700 pt-4 space-y-4 text-sm">
+                      {/* Visual Description */}
+                      <div className="flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                          <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                        </svg>
+                        <div className="flex-1">
+                          <p className="font-semibold text-slate-300 uppercase tracking-wider text-xs">Visual</p>
+                          <p className="text-slate-300 mt-1">{scene.visualDescription}</p>
                         </div>
-                        <div className="space-y-1">
-                            <p className="font-semibold text-slate-300">Camera Movement:</p>
-                            <p className="text-slate-400">{scene.cameraMovement}</p>
+                      </div>
+
+                      {/* Audio Cues */}
+                      <div className="flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-fuchsia-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414z" clipRule="evenodd" />
+                          <path d="M16.071 5.071a1 1 0 011.414 0 5.98 5.98 0 010 9.858 1 1 0 11-1.414-1.414 3.98 3.98 0 000-7.03z" />
+                        </svg>
+                        <div className="flex-1">
+                          <p className="font-semibold text-slate-300 uppercase tracking-wider text-xs">Audio</p>
+                          <p className="text-slate-300 mt-1">{scene.audio}</p>
                         </div>
-                        <div className="space-y-1">
-                            <p className="font-semibold text-slate-300">Time:</p>
-                            <p className="text-slate-400">{scene.approxDuration}</p>
+                      </div>
+
+                      {/* Camera Details */}
+                      <div className="flex items-start gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+                        </svg>
+                        <div className="flex-1">
+                          <p className="font-semibold text-slate-300 uppercase tracking-wider text-xs">Camera</p>
+                          <div className="mt-1 font-mono text-amber-300/80 text-xs space-x-4 bg-slate-900/50 p-2 rounded-md inline-block">
+                            <span>Angle: {scene.cameraAngle}</span>
+                            <span className="border-l border-slate-600 pl-4">Movement: {scene.cameraMovement}</span>
+                          </div>
                         </div>
-                        <div className="md:col-span-3 space-y-1">
-                            <p className="font-semibold text-slate-300">Descript:</p>
-                            <p className="text-slate-400">{scene.visualDescription}</p>
-                        </div>
-                         <div className="md:col-span-3 space-y-1">
-                            <p className="font-semibold text-slate-300">Sound:</p>
-                            <p className="text-slate-400">{scene.audio}</p>
-                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -2146,7 +2167,7 @@ const DesignAssessmentModule = ({ onGoHome, user }) => {
                 {Object.entries(assessmentResult.scores).map(([key, value]) => (
                   <div key={key}>
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-slate-300">{scoreLabels[key]}</span>
+                      <span className="text-slate-300">{scoreLabels[key as keyof typeof scoreLabels]}</span>
                       <span className="font-bold text-cyan-400">{value} / 10</span>
                     </div>
                     <div className="w-full bg-slate-700 rounded-full h-2.5">
@@ -2204,196 +2225,45 @@ const DesignAssessmentModule = ({ onGoHome, user }) => {
                             <img src={URL.createObjectURL(image.file)} alt={`Preview ${index + 1}`} className="w-full h-full object-cover rounded-md" />
                             <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button onClick={() => handleRemoveImage(index)} className="text-white bg-red-600 hover:bg-red-700 rounded-full p-1.5" aria-label={`ลบรูปภาพ ${index + 1}`}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
                     ))}
                 </div>
-            )}
-             <div className="border-2 border-dashed border-slate-600 hover:border-cyan-400 transition-colors rounded-lg p-4 text-center">
-                 <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                 <label htmlFor="file-upload" className="cursor-pointer text-cyan-400 hover:text-cyan-300 font-semibold">
-                     <span>{designImages.length > 0 ? 'เพิ่มรูปภาพ' : 'อัปโหลดรูปภาพ'}</span>
-                     <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/png, image/jpeg, image/webp, image/heic, image/heif, image/*" onChange={handleImageChange} multiple />
-                 </label>
-                 <p className="text-xs text-slate-500 mt-1">สามารถเลือกได้หลายไฟล์</p>
-            </div>
+             )}
+             <label htmlFor="design-upload" className="cursor-pointer w-full border-2 border-dashed border-slate-600 hover:border-cyan-500 transition-colors rounded-lg p-6 flex flex-col items-center justify-center text-center text-slate-400">
+                 <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                 </svg>
+                 <span className="font-semibold">อัปโหลดรูปภาพ</span>
+                 <span className="text-xs mt-1">สามารถเลือกได้หลายไฟล์</span>
+             </label>
+             <input id="design-upload" type="file" className="hidden" accept="image/*" multiple onChange={handleImageChange} />
           </div>
         </div>
-        <button onClick={handleAssessDesign} disabled={loading} className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-slate-600 flex items-center justify-center h-10">
-          {loading ? <div className="loader !w-6 !h-6 !border-2"></div> : 'ประเมินงานออกแบบ'}
+         <button onClick={handleAssessDesign} disabled={loading} className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-slate-600 flex items-center justify-center h-10">
+          {loading ? <div className="loader !w-6 !h-6 !border-2"></div> : 'ประเมินผลงานออกแบบ'}
         </button>
         {error && <p className="text-red-400 mt-2 text-center">{error}</p>}
       </section>
-      
+
       {renderAssessmentResult()}
-
-    </div>
-  );
-};
-
-const UserGuideModule = ({ onGoHome }) => {
-  return (
-    <div className="container mx-auto p-4 space-y-8 animate-fade-in">
-      <section className="bg-slate-900/60 backdrop-blur-lg border border-slate-700/80 p-6 rounded-2xl shadow-xl">
-        <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-cyan-400">คู่มือการใช้งานแอพลิเคชั่น AI Creativity Tool</h2>
-            <button onClick={onGoHome} className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center space-x-2 text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-              </svg>
-              <span>หน้าหลัก</span>
-            </button>
-        </div>
-        <div className="space-y-8">
-            {/* Creative Corner Guide */}
-            <div className="bg-slate-800/50 p-6 rounded-xl">
-                <h3 className="text-xl font-bold text-cyan-400 mb-3">สร้างสรรค์ไอเดีย (Creative Corner)</h3>
-                <p className="mb-4 text-slate-300">เครื่องมือนี้ช่วยระดมสมอง สร้างไอเดียสำหรับวิดีโอสั้น สร้างภาพตัวอย่าง และพัฒนาสคริปต์พร้อมถ่ายทำ</p>
-                <h4 className="font-semibold text-slate-200 mb-2">ขั้นตอนการใช้งาน:</h4>
-                <ol className="list-decimal list-inside space-y-2 text-slate-300">
-                    <li>ไปที่หน้า "สร้างสรรค์ไอเดีย"</li>
-                    <li>เลือก<strong className="text-cyan-300">หัวข้อ/ผลิตภัณฑ์</strong>จากเมนู จากนั้นกรอก<strong className="text-cyan-300">กลุ่มเป้าหมาย</strong> และ<strong className="text-cyan-300">เป้าหมายของคอนเทนต์</strong> (หากไม่มีหัวข้อที่ต้องการ สามารถเลือก 'อื่นๆ' เพื่อระบุเองได้)</li>
-                    <li>กดปุ่ม <strong className="text-cyan-300">"สร้างไอเดีย"</strong> AI จะเสนอ 3 ไอเดียให้เลือก</li>
-                    <li>สำหรับแต่ละไอเดีย คุณสามารถ:
-                        <ul className="list-disc list-inside mt-2 ml-4 space-y-1">
-                            <li><strong>สร้างภาพตัวอย่าง:</strong> กดปุ่มเพื่อสร้างภาพประกอบคอนเซ็ปต์</li>
-                            <li><strong>สร้างสคริปต์:</strong> กดปุ่มเพื่อเขียนสคริปต์ถ่ายทำโดยละเอียด</li>
-                            <li><strong>ฟังเสียงบรรยาย:</strong> ในตารางสคริปต์ กดไอคอนรูปลำโพงเพื่อฟังเสียงบรรยายแต่ละฉาก</li>
-                            <li><strong>บันทึกสคริปต์:</strong> กดปุ่มเพื่อดาวน์โหลดสคริปต์เป็นไฟล์ .txt</li>
-                        </ul>
-                    </li>
-                </ol>
-            </div>
-
-            {/* Speech Generation Guide */}
-            <div className="bg-slate-800/50 p-6 rounded-xl">
-                <h3 className="text-xl font-bold text-rose-400 mb-3">สร้างสรรค์บทพูด (Speech Generation)</h3>
-                <p className="mb-4 text-slate-300">สร้างสรรค์บทพูดและสคริปต์สำหรับโอกาสต่างๆ ตั้งแต่การนำเสนอผลงานไปจนถึงสคริปต์วิดีโอ</p>
-                <h4 className="font-semibold text-slate-200 mb-2">ขั้นตอนการใช้งาน:</h4>
-                <ol className="list-decimal list-inside space-y-2 text-slate-300">
-                    <li>ไปที่หน้า "สร้างสรรค์บทพูด"</li>
-                    <li>เลือก<strong className="text-rose-300">ประเภทของบทพูด</strong>ที่ต้องการ</li>
-                    <li>กรอกรายละเอียด: <strong className="text-rose-300">กลุ่มผู้ฟัง</strong>, <strong className="text-rose-300">เป้าหมาย</strong>, และ<strong className="text-rose-300">สไตล์ของผู้พูด</strong></li>
-                    <li>หากต้องการระดมสมองเรื่องหัวข้อ สามารถใช้<strong className="text-rose-300">ปุ่มบันทึกเสียง</strong>เพื่อพูดไอเดีย แล้ว AI จะแปลงเป็นข้อความให้</li>
-                    <li>กดปุ่ม<strong className="text-rose-300">"สร้างบทพูด"</strong> เพื่อให้ AI สร้างสรรค์ผลงาน</li>
-                    <li>คุณสามารถ<strong className="text-rose-300">คัดลอก</strong>หรือ<strong className="text-rose-300">บันทึกเป็นไฟล์ .txt</strong>ได้</li>
-                     <li><strong className="text-yellow-300">Tip:</strong> สามารถกดปุ่ม "ดูไอเดีย" เพื่อนำไอเดียที่บันทึกไว้จาก Creative Corner มาใช้เป็นหัวข้อได้</li>
-                </ol>
-            </div>
-
-            {/* Image Generation Guide */}
-            <div className="bg-slate-800/50 p-6 rounded-xl">
-                <h3 className="text-xl font-bold text-amber-400 mb-3">สร้างสรรค์ภาพ (Image Generation)</h3>
-                <p className="mb-4 text-slate-300">เปลี่ยนข้อความคำอธิบายให้กลายเป็นภาพที่สวยงาม สามารถใช้สร้าง Mood Board, ภาพประกอบ, หรือภาพต้นแบบได้</p>
-                <h4 className="font-semibold text-slate-200 mb-2">ขั้นตอนการใช้งาน:</h4>
-                <ol className="list-decimal list-inside space-y-2 text-slate-300">
-                    <li>ไปที่หน้า "สร้างสรรค์ภาพ"</li>
-                    <li><strong className="text-amber-300">อธิบายภาพที่ต้องการ</strong>ในกล่องข้อความ ยิ่งละเอียด ยิ่งได้ภาพที่ตรงใจ</li>
-                    <li>เลือก<strong className="text-amber-300">สไตล์ภาพ</strong>ที่ต้องการ (เช่น ภาพถ่าย, ภาพวาด, 3D)</li>
-                    <li>เลือก<strong className="text-amber-300">สัดส่วนภาพ</strong> (Aspect Ratio) ที่ต้องการ (เช่น 1:1 สำหรับโซเชียลมีเดีย, 16:9 สำหรับวิดีโอ)</li>
-                    <li>(ทางเลือก) สามารถ<strong className="text-amber-300">แนบไฟล์รูปตัวอย่าง</strong> เพื่อให้ AI ใช้เป็นแรงบันดาลใจในการสร้างภาพใหม่ได้</li>
-                    <li>กดปุ่ม<strong className="text-amber-300">"สร้างภาพ"</strong> AI จะสร้างผลงานให้ 4 แบบ (หากไม่ได้ใช้รูปตัวอย่าง)</li>
-                    <li>คลิกที่ภาพที่ต้องการเพื่อดูตัวอย่างขนาดใหญ่ จากนั้นกดปุ่ม <strong className="text-amber-300">"ดาวน์โหลดภาพนี้"</strong> เพื่อบันทึกไฟล์</li>
-                    <li><strong className="text-amber-300">ข้อแนะนำ:</strong> ไฟล์ที่ดาวน์โหลดจะเป็นไฟล์ภาพประเภท JPG ซึ่งเหมาะสำหรับเปิดด้วยโปรแกรมดูภาพทั่วไป (เช่น Photos บน Windows) หรือโปรแกรมแต่งภาพ (เช่น Photoshop) ไม่แนะนำให้เปิดด้วยโปรแกรมสำหรับงานเวกเตอร์ (เช่น Illustrator) เนื่องจากเป็นไฟล์คนละประเภทกัน</li>
-                </ol>
-            </div>
-
-            {/* Media Assessment Guide */}
-            <div className="bg-slate-800/50 p-6 rounded-xl">
-                <h3 className="text-xl font-bold text-indigo-400 mb-3">ประเมินผลงานสื่อมีเดีย (Media Work Assessment)</h3>
-                <p className="mb-4 text-slate-300">วิเคราะห์และให้คะแนนผลงานมีเดียประเภทต่างๆ ตามเกณฑ์มาตรฐานมืออาชีพ เพื่อหาจุดแข็งและแนวทางพัฒนา</p>
-                 <h4 className="font-semibold text-slate-200 mb-2">ขั้นตอนการใช้งาน:</h4>
-                <ol className="list-decimal list-inside space-y-2 text-slate-300">
-                    <li>ไปที่หน้า "ประเมินผลงานสื่อมีเดีย"</li>
-                    <li>เลือก <strong className="text-indigo-300">ประเภทของสื่อ</strong> จากเมนู (เช่น ภาพยนตร์, สปอตโฆษณา, ภาพถ่าย)</li>
-                    <li>ระบุ <strong className="text-indigo-300">เป้าหมายของผลงาน</strong></li>
-                    <li>นำผลงานที่ต้องการประเมินใส่ในระบบ โดยมี 2 วิธี:
-                         <ul className="list-disc list-inside mt-2 ml-4 space-y-1">
-                            <li><strong>วางข้อความ:</strong> คัดลอกสคริปต์หรือเนื้อหามาวางในกล่องข้อความ</li>
-                            <li><strong>อัปโหลดไฟล์:</strong> กดปุ่ม "อัปโหลดไฟล์" เพื่อเลือกไฟล์ .txt หรือไฟล์วิดีโอ</li>
-                        </ul>
-                    </li>
-                    <li>กดปุ่ม <strong className="text-indigo-300">"ประเมินผลงาน"</strong> AI จะแสดงผลเป็นคะแนนในแต่ละเกณฑ์ พร้อมบอกจุดแข็งและข้อเสนอแนะ</li>
-                </ol>
-            </div>
-
-            {/* Design Assessment Guide */}
-            <div className="bg-slate-800/50 p-6 rounded-xl">
-                <h3 className="text-xl font-bold text-emerald-400 mb-3">ประเมินผลงานการออกแบบ (Design Assessment)</h3>
-                <p className="mb-4 text-slate-300">ประเมินงานออกแบบภาพนิ่ง เช่น โปสเตอร์, UI, หรือชุดภาพโฆษณาตามหลักการออกแบบ</p>
-                <h4 className="font-semibold text-slate-200 mb-2">ขั้นตอนการใช้งาน:</h4>
-                 <ol className="list-decimal list-inside space-y-2 text-slate-300">
-                    <li>ไปที่หน้า "ประเมินผลงานการออกแบบ"</li>
-                    <li>กรอกข้อมูล 3 ช่อง: <strong className="text-emerald-300">แนวคิดการออกแบบ</strong>, <strong className="text-emerald-300">กลุ่มเป้าหมาย</strong>, และ <strong className="text-emerald-300">เป้าหมายของการออกแบบ</strong></li>
-                    <li><strong className="text-emerald-300">อัปโหลดรูปภาพ</strong> ผลงานที่ต้องการประเมิน (สามารถอัปโหลดได้หลายภาพพร้อมกัน)</li>
-                    <li>กดปุ่ม <strong className="text-emerald-300">"ประเมินงานออกแบบ"</strong> AI จะแสดงผลคะแนนโดยรวม, คะแนนตามเกณฑ์ย่อย, และข้อเสนอแนะ</li>
-                </ol>
-            </div>
-        </div>
-      </section>
-    </div>
-  );
-};
-
-const CreatorModule = ({ onGoHome }) => {
-  const creatorImage = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAHgA8MDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A/fyiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA'
-return (
-  <div className="container mx-auto p-4 space-y-8 animate-fade-in">
-    <section className="bg-slate-900/60 backdrop-blur-lg border border-slate-700/80 p-6 rounded-2xl shadow-xl max-w-2xl mx-auto text-center">
-        <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-cyan-400">ผู้สร้างเครื่องมือ</h2>
-            <button onClick={onGoHome} className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center space-x-2 text-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
-              </svg>
-              <span>หน้าหลัก</span>
-            </button>
-        </div>
-         
-         <img src={creatorImage} alt="ฐากร อยู่วิจิตร" className="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-4 border-cyan-400 shadow-lg shadow-cyan-400/30" />
-         
-         <h2 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-fuchsia-500 text-transparent bg-clip-text mb-2">ฐากร อยู่วิจิตร</h2>
-         <h3 className="text-lg text-slate-300 mb-1">Multimedia Technology Teacher & AI Developer</h3>
-         <p className="text-md text-slate-400 mb-4">
-            คณะวิทยาศาสตร์และเทคโนโลยี มหาวิทยาลัยเทคโนโลยีราชมงคลสุวรรณภูมิ
-         </p>
-
-         <div className="border-t border-slate-700 my-6"></div>
-
-         <h4 className="text-lg font-semibold text-cyan-400 mb-2">แนวคิดในการออกแบบเครื่องมือ</h4>
-         <p className="text-slate-400 mb-6 px-4">
-          เครื่องมือนี้ถูกออกแบบมาเพื่อเป็นผู้ช่วยสำหรับนักสร้างสรรค์คอนเทนต์และนักออกแบบ ช่วยลดขั้นตอนการทำงานที่ซับซ้อน ตั้งแต่การระดมสมองไปจนถึงการประเมินผลงาน เพื่อให้ผู้ใช้งานสามารถมุ่งเน้นไปที่การสร้างสรรค์ผลงานที่มีคุณภาพได้อย่างเต็มที่
-         </p>
-         
-         <div className="flex justify-center space-x-6">
-            <a href="mailto:thakorn.yoo@gmail.com" className="text-slate-400 hover:text-cyan-400 hover:scale-110 transition-all" aria-label="Email">
-               <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-               </svg>
-            </a>
-            <a href="https://www.facebook.com/thakorn.yoo/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-cyan-400 hover:scale-110 transition-all" aria-label="Facebook">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
-                </svg>
-            </a>
-         </div>
-      </section>
     </div>
   );
 };
 
 const ImageGenerationModule = ({ onGoHome, user, userSettings, updateUserSettings }) => {
     const [prompt, setPrompt] = useState('');
-    const [style, setStyle] = useState(userSettings?.imageStyle || 'ภาพถ่ายสมจริง (Photorealistic)');
+    const [style, setStyle] = useState(userSettings?.imageStyle || 'สมจริง');
     const [aspectRatio, setAspectRatio] = useState(userSettings?.imageAspectRatio || '1:1');
-    const [referenceImage, setReferenceImage] = useState<{ file: File, base64: string, mimeType: string } | null>(null);
+    const [numberOfImages, setNumberOfImages] = useState(1);
     const [generatedImages, setGeneratedImages] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const imageIteration = useRef(0);
     const isMounted = useRef(true);
 
@@ -2402,180 +2272,58 @@ const ImageGenerationModule = ({ onGoHome, user, userSettings, updateUserSetting
         return () => { isMounted.current = false; };
     }, []);
 
-    const imageStyles = [
-        'ภาพถ่ายสมจริง (Photorealistic)',
-        'ภาพวาดดิจิทัล (Digital Painting)',
-        'ศิลปะแนวคอนเซปต์ (Concept Art)',
-        'โมเดล 3 มิติ (3D Model)',
-        'ซีเนมาติก (Cinematic)',
-        'ภาพถ่ายวินเทจ (Vintage Photo)',
-        'มินิมอลลิสต์ (Minimalist)',
-        'กราฟิกโนเวล (Graphic Novel)',
-        'ภาพการ์ตูน (Cartoon)',
-        'ภาพอนิเมะ (Anime)',
-        'ศิลปะพิกเซล (Pixel Art)',
-        'ภาพวาดสีน้ำ (Watercolor)',
-        'ภาพแบบเวกเตอร์ (Vector Art)',
-        'แนวไซเบอร์พังค์ (Cyberpunk)',
-        'แนวแฟนตาซี (Fantasy)',
-        'แนวสตีมพังค์ (Steampunk)',
-        'แนวเหนือจริง (Surrealism)',
-        'แนวนามธรรม (Abstract)',
-        'ภาพขาว-ดำ (Black and White)',
-        'ภาพวาดเส้น (Line Art)',
-        'สไตล์ Isometric',
-        'สไตล์ Low Poly'
-    ];
-    
-    const aspectRatios = [
-        { label: 'จัตุรัส (1:1)', value: '1:1' },
-        { label: 'สตอรี่ (9:16)', value: '9:16' },
-        { label: 'ไวด์สกรีน (16:9)', value: '16:9' },
-        { label: 'แนวนอน (4:3)', value: '4:3' },
-        { label: 'แนวตั้ง (3:4)', value: '3:4' },
-    ];
-
-    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            if (!file.type.startsWith('image/')) {
-                setError('กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น');
-                return;
-            }
-            setError('');
-            try {
-                const { base64, mimeType } = await blobToBase64(file);
-                setReferenceImage({ file, base64, mimeType });
-            } catch (err) {
-                console.error(err);
-                setError('เกิดข้อผิดพลาดในการประมวลผลรูปภาพ');
-            }
-        }
-    };
-
-    const handleRemoveImage = () => {
-        setReferenceImage(null);
-    };
-
-    const handleGenerateImage = () => {
-        if (!prompt.trim() && !referenceImage) {
-            setError('กรุณาอธิบายภาพที่ต้องการสร้าง หรือแนบไฟล์รูปตัวอย่าง');
+    const handleGenerateImages = () => {
+        if (!prompt.trim()) {
+            setError('กรุณาใส่คำสั่งเพื่อสร้างภาพ');
             return;
         }
-        setLoading(true);
         setError('');
+        setLoading(true);
         setGeneratedImages([]);
         imageIteration.current += 1;
         const startTime = Date.now();
-        const useReferenceImage = referenceImage?.base64 && referenceImage?.mimeType;
-        const promptData = {
-            prompt,
-            style,
-            aspectRatio,
-            hasReferenceImage: !!useReferenceImage,
-        };
+        const fullPrompt = `${prompt}, สไตล์ ${style}`;
+        const promptData = { prompt, style, aspectRatio, numberOfImages };
 
         enqueueApiRequest(async () => {
             try {
-                // Logic is now clearer: if a valid reference image exists, use the image-editing model.
-                // Otherwise, use the standard text-to-image model.
-                if (useReferenceImage) {
-                     const textPart = { text: prompt ? `สร้างภาพใหม่โดยได้รับแรงบันดาลใจจากภาพอ้างอิงนี้ ภาพใหม่ควรเกี่ยวกับ: "${prompt}" ในสไตล์ ${style}` : `สร้างภาพใหม่โดยได้รับแรงบันดาลใจจากภาพอ้างอิงนี้ ในสไตล์ ${style}` };
-                    const imagePart = {
-                        inlineData: {
-                            data: referenceImage.base64,
-                            mimeType: referenceImage.mimeType,
-                        },
-                    };
-    
-                    const response = await ai.models.generateContent({
-                        model: 'gemini-2.5-flash-image-preview',
-                        contents: { parts: [imagePart, textPart] },
-                        config: {
-                            responseModalities: [Modality.IMAGE, Modality.TEXT],
-                        },
+                const response = await ai.models.generateImages({
+                    model: 'imagen-4.0-generate-001',
+                    prompt: fullPrompt,
+                    config: {
+                        numberOfImages: numberOfImages,
+                        outputMimeType: 'image/jpeg',
+                        aspectRatio: aspectRatio as "1:1" | "3:4" | "4:3" | "9:16" | "16:9",
+                    },
+                });
+
+                if (isMounted.current) {
+                    const imageUrls = response.generatedImages.map(img => `data:image/jpeg;base64,${img.image.imageBytes}`);
+                    setGeneratedImages(imageUrls);
+                    logInteraction(user, {
+                        task: 'Image Generation',
+                        status: 'Success',
+                        durationMs: Date.now() - startTime,
+                        prompt: promptData,
+                        result: `${imageUrls.length} images generated`,
+                        iteration: imageIteration.current,
+                        collaborationPattern: 'AI-assisted'
                     });
-    
-                    let foundImage = false;
-                    for (const part of response.candidates[0].content.parts) {
-                        if (part.inlineData) {
-                             if (isMounted.current) {
-                                const base64ImageBytes = part.inlineData.data;
-                                const imageUrl = `data:${part.inlineData.mimeType};base64,${base64ImageBytes}`;
-                                setGeneratedImages([imageUrl]);
-                            }
-                            foundImage = true;
-                            break;
-                        }
-                    }
-                    if (isMounted.current) {
-                        if (foundImage) {
-                            logInteraction(user, {
-                                task: 'Image Generation',
-                                status: 'Success',
-                                durationMs: Date.now() - startTime,
-                                prompt: promptData,
-                                result: '1 image generated with reference',
-                                iteration: imageIteration.current,
-                                collaborationPattern: 'Co-creation'
-                            });
-                        } else {
-                             setError('AI ไม่สามารถสร้างภาพจากข้อมูลที่ให้มาได้');
-                            logInteraction(user, {
-                                task: 'Image Generation',
-                                status: 'Failed',
-                                durationMs: Date.now() - startTime,
-                                prompt: promptData,
-                                result: 'AI could not generate an image from the provided data.',
-                                iteration: imageIteration.current,
-                                collaborationPattern: 'Co-creation'
-                            });
-                        }
-                    }
-                } else {
-                    if (!prompt.trim()) {
-                        setError('กรุณาอธิบายภาพที่ต้องการสร้าง');
-                        if (isMounted.current) setLoading(false);
-                        return;
-                    }
-                    const fullPrompt = `${prompt}, สไตล์: ${style}.`;
-                    const response = await ai.models.generateImages({
-                        model: 'imagen-4.0-generate-001',
-                        prompt: fullPrompt,
-                        config: {
-                            numberOfImages: 4,
-                            outputMimeType: 'image/jpeg',
-                            aspectRatio: aspectRatio,
-                        },
-                    });
-                    if (isMounted.current) {
-                        const imageUrls = response.generatedImages.map(img => `data:image/jpeg;base64,${img.image.imageBytes}`);
-                        setGeneratedImages(imageUrls);
-                        logInteraction(user, {
-                            task: 'Image Generation',
-                            status: 'Success',
-                            durationMs: Date.now() - startTime,
-                            prompt: promptData,
-                            result: `${imageUrls.length} images generated`,
-                            iteration: imageIteration.current,
-                            collaborationPattern: 'Co-creation'
-                        });
-                    }
                 }
             } catch (err) {
                 console.error(err);
-                const errorMessage = getApiErrorMessage(err);
-                 logInteraction(user, {
+                const friendlyError = getApiErrorMessage(err);
+                logInteraction(user, {
                     task: 'Image Generation',
                     status: 'Error',
                     durationMs: Date.now() - startTime,
                     prompt: promptData,
                     result: err.message,
                     iteration: imageIteration.current,
-                    collaborationPattern: 'Co-creation'
+                    collaborationPattern: 'AI-assisted'
                 });
                 if (isMounted.current) {
-                    setError(errorMessage);
+                    setError(friendlyError);
                 }
             } finally {
                 if (isMounted.current) {
@@ -2586,293 +2334,364 @@ const ImageGenerationModule = ({ onGoHome, user, userSettings, updateUserSetting
     };
     
     const handleDownloadImage = (imageUrl: string, index: number) => {
-        if (!imageUrl) return;
         const link = document.createElement('a');
         link.href = imageUrl;
-        link.download = `ai-generated-${Date.now()}-${index + 1}.jpg`;
+        link.download = `ai_generated_image_${index + 1}.jpeg`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
-    const Lightbox = ({ imageUrl, onClose, onDownload }) => {
-        if (!imageUrl) return null;
-        return (
-            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
-                <div className="relative max-w-4xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-                    <img src={imageUrl} alt="Enlarged view" className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl" />
-                    <button onClick={onClose} className="absolute -top-3 -right-3 text-white bg-slate-800/80 hover:bg-red-600 rounded-full p-2 transition-colors">
-                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full text-center">
-                         <button onClick={onDownload} className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-6 rounded-full transition inline-flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 9.293a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                            <span>ดาวน์โหลดภาพนี้</span>
-                        </button>
-                        <p className="text-xs text-slate-400 mt-2 px-4">(ไฟล์ JPG: แนะนำให้เปิดด้วยโปรแกรมดูภาพทั่วไป ไม่ใช่ Illustrator)</p>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
-
     return (
         <div className="container mx-auto p-4 space-y-8 animate-fade-in">
-             <Lightbox 
-                imageUrl={lightboxImage} 
-                onClose={() => setLightboxImage(null)} 
-                onDownload={() => lightboxImage && handleDownloadImage(lightboxImage, generatedImages.indexOf(lightboxImage))}
-            />
             <section className="bg-slate-900/60 backdrop-blur-lg border border-slate-700/80 p-6 rounded-2xl shadow-xl">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-cyan-400">สร้างสรรค์ภาพ (Image Generation)</h2>
-                    <button onClick={onGoHome} className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center space-x-2 text-sm">
+                     <button onClick={onGoHome} className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center space-x-2 text-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                          <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                         </svg>
                         <span>หน้าหลัก</span>
-                    </button>
+                      </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                    {/* Left Column: Inputs */}
-                    <div className="space-y-4">
-                        <textarea
-                            value={prompt}
-                            onChange={(e) => setPrompt(e.target.value)}
-                            placeholder="อธิบายภาพที่ต้องการสร้าง... (เช่น 'นักบินอวกาศขี่ม้าบนดาวอังคาร')"
-                            className="w-full bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 h-24 resize-y"
-                            aria-label="Image prompt"
-                        />
-                        <select
-                            value={style}
-                            onChange={(e) => {
+                <div className="space-y-4 mb-4">
+                    <textarea
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        placeholder="ใส่คำสั่ง (prompt) เพื่อสร้างภาพ... (เช่น 'นักบินอวกาศกำลังขี่ม้าบนดาวอังคาร')"
+                        className="w-full bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500 h-28 resize-y"
+                    />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <select 
+                            value={style} 
+                            onChange={e => {
                                 setStyle(e.target.value);
                                 updateUserSettings({ imageStyle: e.target.value });
-                            }}
-                            className="w-full bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                            aria-label="Image style"
+                            }} 
+                            className="bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                         >
-                            {imageStyles.map(s => <option key={s} value={s}>{s}</option>)}
+                            <optgroup label="สไตล์ภาพถ่าย">
+                                <option value="สมจริง">สมจริง (Photorealistic)</option>
+                                <option value="ภาพฟิล์ม">ภาพฟิล์ม (Analog Film)</option>
+                                <option value="ภาพถ่ายขาว-ดำ">ภาพถ่ายขาว-ดำ (Black & White)</option>
+                                <option value="ซีเนมาติก">ซีเนมาติก (Cinematic)</option>
+                            </optgroup>
+                            <optgroup label="สไตล์ภาพวาดและศิลปะ">
+                                <option value="ภาพวาดสีน้ำมัน">ภาพวาดสีน้ำมัน (Oil Painting)</option>
+                                <option value="ภาพวาดลายเส้น">ภาพวาดลายเส้น (Line Art)</option>
+                                <option value="ศิลปะแนวแฟนตาซี">แฟนตาซี (Fantasy)</option>
+                                <option value="ศิลปะแนวไซเบอร์พังค์">ไซเบอร์พังค์ (Cyberpunk)</option>
+                                <option value="แนวคอนเซปต์อาร์ต">คอนเซปต์อาร์ต (Concept art)</option>
+                                <option value="สไตล์การ์ตูน">การ์ตูน (Cartoon)</option>
+                                <option value="สีน้ำ">สีน้ำ (Watercolor)</option>
+                            </optgroup>
+                            <optgroup label="สไตล์แอนิเมชัน">
+                                 <option value="อนิเมะ">อนิเมะ (Anime)</option>
+                                 <option value="พิกซาร์">พิกซาร์ (Pixar)</option>
+                                 <option value="ดิสนีย์">ดิสนีย์ (Disney)</option>
+                            </optgroup>
+                            <optgroup label="สไตล์กราฟิกและโมเดล">
+                                <option value="แบบจำลอง 3 มิติ">แบบจำลอง 3 มิติ (3D Model)</option>
+                                <option value="ไอโซเมตริก">ไอโซเมตริก (Isometric)</option>
+                                <option value="โลว์โพลี">โลว์โพลี (Low Poly)</option>
+                                <option value="ศิลปะพิกเซล">ศิลปะพิกเซล (Pixel Art)</option>
+                                <option value="เวคเตอร์">เวคเตอร์ (Vector Art)</option>
+                                <option value="สถาปัตยกรรม">สถาปัตยกรรม (Architectural)</option>
+                            </optgroup>
+                            <optgroup label="สไตล์งานฝีมือ">
+                                <option value="โอริกามิ">โอริกามิ (Origami)</option>
+                                <option value="ดินปั้น">ดินปั้น (Craft Clay)</option>
+                            </optgroup>
                         </select>
-                         {!referenceImage && (
-                            <select
-                                value={aspectRatio}
-                                onChange={(e) => {
-                                    setAspectRatio(e.target.value);
-                                    updateUserSettings({ imageAspectRatio: e.target.value });
-                                }}
-                                className="w-full bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                                aria-label="Image aspect ratio"
-                            >
-                                {aspectRatios.map(ar => <option key={ar.value} value={ar.value}>{ar.label}</option>)}
-                            </select>
-                        )}
-                        <div className="border-2 border-dashed border-slate-600 hover:border-cyan-400 transition-colors rounded-lg p-4 text-center">
-                            {referenceImage ? (
-                                <div className="relative group aspect-square max-w-[200px] mx-auto">
-                                    <img src={URL.createObjectURL(referenceImage.file)} alt="Preview" className="w-full h-full object-cover rounded-md" />
-                                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={handleRemoveImage} className="text-white bg-red-600 hover:bg-red-700 rounded-full p-1.5" aria-label="ลบรูปภาพ">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" /></svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            ) : (
-                                <>
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                                    <label htmlFor="ref-image-upload" className="cursor-pointer text-cyan-400 hover:text-cyan-300 font-semibold">
-                                        <span>แนบไฟล์รูปตัวอย่าง</span>
-                                        <input id="ref-image-upload" type="file" className="sr-only" accept="image/*" onChange={handleImageUpload} />
-                                    </label>
-                                    <p className="text-xs text-slate-500 mt-1">(ถ้ามี)</p>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                     {/* Right Column: Result */}
-                     <div className="flex flex-col items-center justify-center bg-slate-800/40 rounded-lg p-4 space-y-4 min-h-[300px]">
-                        {loading ? (
-                             <div className="flex flex-col items-center justify-center h-full">
-                                <div className="loader"></div>
-                                <p className="mt-4 text-slate-400">กำลังสร้างภาพ...</p>
-                            </div>
-                        ) : generatedImages.length > 0 ? (
-                            <div className="w-full">
-                                {generatedImages.length > 1 ? (
-                                    <div className="grid grid-cols-2 grid-rows-2 gap-4">
-                                        {/* FIX: Add explicit types to map arguments to fix type inference issue. */}
-                                        {generatedImages.map((imageUrl: string, index: number) => (
-                                            <div 
-                                                key={index} 
-                                                className="relative group aspect-square cursor-pointer overflow-hidden rounded-md shadow-lg"
-                                                onClick={() => setLightboxImage(imageUrl)}
-                                                role="button"
-                                                tabIndex={0}
-                                                aria-label={`ดูภาพขยาย ${index + 1}`}
-                                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLightboxImage(imageUrl); } }}
-                                            >
-                                                <img 
-                                                    src={imageUrl} 
-                                                    alt={`AI generated ${index + 1}`} 
-                                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                                                />
-                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div 
-                                        className="relative group aspect-square cursor-pointer overflow-hidden rounded-md shadow-lg w-full max-w-sm mx-auto"
-                                        onClick={() => setLightboxImage(generatedImages[0])}
-                                        role="button"
-                                        tabIndex={0}
-                                        aria-label={`ดูภาพขยาย`}
-                                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setLightboxImage(generatedImages[0]); } }}
-                                    >
-                                        <img 
-                                            src={generatedImages[0]} 
-                                            alt={`AI generated 1`} 
-                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-                                        />
-                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                             <div className="w-full">
-                                <p className="text-center text-slate-500 mb-4">ผลลัพธ์จะแสดงที่นี่</p>
-                                <div className="grid grid-cols-2 grid-rows-2 gap-4">
-                                    {Array.from({ length: 4 }).map((_, index) => (
-                                        <div key={index} className="aspect-square bg-slate-800/50 rounded-lg border-2 border-dashed border-slate-600 flex items-center justify-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                         <select 
+                            value={aspectRatio} 
+                            onChange={e => {
+                                setAspectRatio(e.target.value);
+                                updateUserSettings({ imageAspectRatio: e.target.value });
+                            }} 
+                            className="bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        >
+                            <option value="1:1">จัตุรัส (1:1)</option>
+                            <option value="16:9">แนวนอน (16:9)</option>
+                            <option value="9:16">แนวตั้ง (9:16)</option>
+                            <option value="4:3">แนวนอน 4:3</option>
+                            <option value="3:4">แนวตั้ง 3:4</option>
+                        </select>
+                        <select value={numberOfImages} onChange={e => setNumberOfImages(Number(e.target.value))} className="bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                            <option value={1}>1 ภาพ</option>
+                            <option value={2}>2 ภาพ</option>
+                            <option value={3}>3 ภาพ</option>
+                            <option value={4}>4 ภาพ</option>
+                        </select>
                     </div>
                 </div>
-                <button onClick={handleGenerateImage} disabled={loading} className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 text-white font-bold py-3 px-4 rounded-lg transition disabled:bg-slate-600 flex items-center justify-center h-12">
+                <button onClick={handleGenerateImages} disabled={loading} className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:opacity-90 text-white font-bold py-3 px-4 rounded-lg transition disabled:bg-slate-600 flex items-center justify-center h-12">
                     {loading ? <div className="loader !w-6 !h-6 !border-2"></div> : 'สร้างภาพ'}
                 </button>
                 {error && <p className="text-red-400 mt-2 text-center">{error}</p>}
             </section>
+            
+            {loading && (
+                <div className="text-center p-8">
+                    <div className="loader mx-auto"></div>
+                    <p className="mt-4 text-slate-400">AI กำลังสร้างสรรค์ผลงาน... โปรดรอสักครู่</p>
+                </div>
+            )}
+
+            {generatedImages.length > 0 && (
+                <section className="animate-fade-in">
+                    <h3 className="text-2xl font-bold mb-4 text-center">ภาพที่สร้างโดย AI</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {generatedImages.map((image, index) => (
+                            <div 
+                                key={index} 
+                                className="group relative bg-slate-800 rounded-lg overflow-hidden shadow-lg border border-slate-700 cursor-pointer"
+                                onClick={() => setSelectedImage(image)}
+                            >
+                                <img src={image} alt={`Generated image ${index + 1}`} className="w-full h-full object-contain" />
+                                <div className="absolute inset-0 bg-black/70 flex flex-col gap-2 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity p-4 text-center">
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Prevent modal from opening when clicking download
+                                            handleDownloadImage(image, index);
+                                        }}
+                                        className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105 flex items-center space-x-2"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                          <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 9.293a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                        <span>ดาวน์โหลด</span>
+                                    </button>
+                                     <p className="text-xs text-slate-300">คลิกที่ภาพเพื่อดูขนาดใหญ่</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {selectedImage && (
+                <div 
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" 
+                    onClick={() => setSelectedImage(null)}
+                    aria-modal="true"
+                    role="dialog"
+                >
+                    <div 
+                        className="relative w-full max-w-4xl max-h-[90vh] flex flex-col" 
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <img 
+                            src={selectedImage} 
+                            alt="Enlarged view of generated image" 
+                            className="w-full h-auto object-contain max-h-[calc(90vh-6rem)] rounded-lg border border-slate-700" 
+                        />
+                        
+                        <button 
+                            onClick={() => setSelectedImage(null)} 
+                            className="absolute -top-2 -right-2 text-slate-300 bg-slate-800 hover:bg-slate-700/80 rounded-full p-2 transition-colors shadow-lg"
+                            aria-label="Close image viewer"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <div className="text-center mt-4">
+                             <button
+                                onClick={() => {
+                                    const imageIndex = generatedImages.findIndex(img => img === selectedImage);
+                                    if (imageIndex !== -1) {
+                                        handleDownloadImage(selectedImage, imageIndex);
+                                    }
+                                }}
+                                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105 flex items-center space-x-2 shadow-lg mx-auto"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 9.293a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                                <span>ดาวน์โหลดภาพนี้</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
+const UserGuide = ({ onGoHome }) => (
+    <div className="container mx-auto p-4 animate-fade-in">
+        <div className="bg-slate-900/60 backdrop-blur-lg border border-slate-700/80 p-6 sm:p-8 rounded-2xl shadow-xl max-w-4xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-cyan-400">คู่มือการใช้งานแอพลิเคชั่น</h2>
+                <button onClick={onGoHome} className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center space-x-2 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
+                    <span>หน้าหลัก</span>
+                </button>
+            </div>
+            <div className="space-y-6 text-slate-300 leading-relaxed">
+                <div>
+                    <h3 className="text-xl font-bold text-cyan-300 mb-2">1. สร้างสรรค์ไอเดีย (Idea Generation)</h3>
+                    <p>เครื่องมือนี้ช่วยคุณสร้างไอเดียสำหรับวิดีโอสั้น (Short Video) จำนวน 3 ไอเดียที่ไม่ซ้ำใคร พร้อมรายละเอียดที่สามารถนำไปพัฒนาต่อได้ทันที</p>
+                    <ul className="list-disc list-inside mt-2 space-y-1 pl-4 text-slate-400">
+                        <li><strong>วิธีใช้:</strong> เลือกหัวข้อ, ระบุกลุ่มเป้าหมาย, และเป้าหมายของคอนเทนต์ แล้วกด "สร้างไอเดีย"</li>
+                        <li><strong>ผลลัพธ์:</strong> คุณจะได้ 3 ไอเดียพร้อม Concept, รูปแบบ, เรื่องย่อ, และ Hook</li>
+                        <li><strong>ฟีเจอร์เพิ่มเติม:</strong> สามารถสร้างภาพตัวอย่าง (Cover Image) และสคริปต์สำหรับถ่ายทำได้จากแต่ละไอเดีย</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 className="text-xl font-bold text-rose-300 mb-2">2. สร้างสรรค์บทพูด (Speech Generation)</h3>
+                    <p>ใช้สำหรับสร้างบทพูดหรือสคริปต์สำหรับงานต่าง ๆ ไม่ว่าจะเป็นการกล่าวเปิดงาน, การนำเสนอ, หรือสคริปต์สำหรับวิดีโอ</p>
+                    <ul className="list-disc list-inside mt-2 space-y-1 pl-4 text-slate-400">
+                        <li><strong>วิธีใช้:</strong> เลือกประเภท, ระบุหัวข้อ (หรือใช้เสียงพูดเพื่อสร้างไอเดีย), กลุ่มผู้ฟัง, เป้าหมาย, และสไตล์ของผู้พูด</li>
+                        <li><strong>ผลลัพธ์:</strong> AI จะสร้างชื่อเรื่องและบทพูดที่สมบูรณ์ให้คุณ</li>
+                        <li><strong>ฟีเจอร์เพิ่มเติม:</strong> สามารถนำไอเดียที่บันทึกไว้มาใช้เป็นหัวข้อได้</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 className="text-xl font-bold text-amber-300 mb-2">3. สร้างสรรค์ภาพ (Image Generation)</h3>
+                    <p>เปลี่ยนจินตนาการของคุณให้เป็นภาพด้วย AI เพียงแค่ป้อนคำสั่ง (Prompt) ที่ต้องการ</p>
+                     <ul className="list-disc list-inside mt-2 space-y-1 pl-4 text-slate-400">
+                        <li><strong>วิธีใช้:</strong> พิมพ์คำอธิบายภาพที่ต้องการ, เลือกสไตล์, สัดส่วนภาพ, และจำนวนที่ต้องการสร้าง</li>
+                        <li><strong>ผลลัพธ์:</strong> ได้ภาพตามจินตนาการที่สามารถดาวน์โหลดไปใช้งานได้</li>
+                    </ul>
+                </div>
+                 <div>
+                    <h3 className="text-xl font-bold text-indigo-300 mb-2">4. ประเมินผลงานสื่อมีเดีย (Media Work Assessment)</h3>
+                    <p>ให้ AI ช่วยประเมินผลงานสร้างสรรค์ของคุณ ไม่ว่าจะเป็นสคริปต์, วิดีโอ, หรือภาพถ่าย เพื่อหาจุดแข็งและแนวทางในการพัฒนา</p>
+                     <ul className="list-disc list-inside mt-2 space-y-1 pl-4 text-slate-400">
+                        <li><strong>วิธีใช้:</strong> เลือกประเภทสื่อ, ระบุเป้าหมาย, และวางเนื้อหาหรืออัปโหลดไฟล์ผลงาน</li>
+                        <li><strong>ผลลัพธ์:</strong> AI จะให้คะแนนตามเกณฑ์ต่าง ๆ พร้อมคำแนะนำที่เป็นประโยชน์</li>
+                    </ul>
+                </div>
+                 <div>
+                    <h3 className="text-xl font-bold text-emerald-300 mb-2">5. ประเมินผลงานการออกแบบ (Design Assessment)</h3>
+                    <p>เครื่องมือสำหรับนักออกแบบที่ต้องการ Feedback เกี่ยวกับผลงาน เช่น UI, โปสเตอร์, หรือชุดภาพกราฟิก</p>
+                     <ul className="list-disc list-inside mt-2 space-y-1 pl-4 text-slate-400">
+                        <li><strong>วิธีใช้:</strong> อธิบายแนวคิด, กลุ่มเป้าหมาย, เป้าหมาย, และอัปโหลดไฟล์ภาพผลงาน (สามารถอัปได้หลายภาพ)</li>
+                        <li><strong>ผลลัพธ์:</strong> ได้รับการประเมินใน 5 ด้านหลักของการออกแบบ พร้อมจุดแข็งและข้อเสนอแนะ</li>
+                    </ul>
+                </div>
+                 <div className="border-t border-slate-700 pt-4">
+                    <h3 className="text-lg font-bold text-slate-300 mb-2">ข้อแนะนำทั่วไป</h3>
+                    <p className="text-slate-400">เนื่องจาก API มีโควต้าการใช้งานฟรีที่จำกัด (ประมาณ 1 ครั้งต่อนาที) หากกดปุ่มแล้วไม่มีอะไรเกิดขึ้น หรือขึ้นข้อความแจ้งเตือนโควต้า โปรดรอประมาณ 1 นาทีแล้วลองอีกครั้ง</p>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+const CreatorInfo = ({ onGoHome }) => (
+    <div className="container mx-auto p-4 animate-fade-in">
+        <div className="bg-slate-900/60 backdrop-blur-lg border border-slate-700/80 p-8 rounded-2xl shadow-xl max-w-2xl mx-auto text-center">
+            <div className="flex justify-end mb-4">
+                 <button onClick={onGoHome} className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center space-x-2 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                    </svg>
+                    <span>หน้าหลัก</span>
+                </button>
+            </div>
+            <img 
+                src="https://media.licdn.com/dms/image/D5603AQEQ3Y8qS16wAg/profile-displayphoto-shrink_400_400/0/1699504786438?e=1727308800&v=beta&t=k6EAvjQ3R8c8sZp2xY8b8Q6fJ6n8W4y2v7o7i7F0Z7c" 
+                alt="Thakorn Yuvijit"
+                className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-cyan-500 shadow-lg"
+            />
+            <h2 className="text-3xl font-bold text-cyan-400">ฐากร อยู่วิจิตร (Thakorn Yuvijit)</h2>
+            <p className="text-slate-400 mt-2">อาจารย์หลักสูตรเทคโนโลยีมัลติมีเดีย สุพรรณบุรี มหาวิทยาลัยเทคโนโลยีราชมงคลสุวรรณภูมิ/AI Developer</p>
+            <p className="text-slate-400">นศ.ปริญญาเอก หลักสูตรเทคโนโลยีและนวัตกรรมการเรียนรู้ / มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าธนบุรี</p>
+            
+            <div className="mt-6 border-t border-slate-700 pt-6">
+                <p className="text-slate-300">
+                    แอปพลิเคชันนี้ถูกสร้างขึ้นเพื่อเป็นเครื่องมือต้นแบบสำหรับการนำ Generative AI มาประยุกต์ใช้ในงานด้านความคิดสร้างสรรค์ การผลิตสื่อ และการออกแบบการสื่อสาร
+                </p>
+            </div>
+        </div>
+    </div>
+);
+
 
 const App = () => {
   const [user, setUser] = useState<User | null>(null);
-  const [currentPage, setCurrentPage] = useState('login');
+  const [page, setPage] = useState('welcome');
   const [savedIdeas, setSavedIdeas] = useState<Idea[]>([]);
   const [userSettings, setUserSettings] = useState<UserSettings>({});
-
+  
   useEffect(() => {
-    // Check if user is already logged in from a previous session
+    // On mount, try to load user data, settings, and saved ideas from local storage
     const storedUser = localStorage.getItem('ai-creativity-user');
+    const storedSettings = localStorage.getItem('ai-creativity-settings');
+    const storedIdeas = localStorage.getItem('ai-creativity-saved-ideas');
+
     if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      setCurrentPage('welcome');
-      // Load user settings
-      const storedSettings = localStorage.getItem(`ai-creativity-settings-${parsedUser.email}`);
-      if (storedSettings) {
-        setUserSettings(JSON.parse(storedSettings));
-      }
+      setUser(JSON.parse(storedUser));
     }
-     // Load saved ideas from local storage on initial app load
-    const storedSavedIdeas = localStorage.getItem('saved-creative-ideas');
-    if (storedSavedIdeas) {
-      setSavedIdeas(JSON.parse(storedSavedIdeas));
+    if (storedSettings) {
+      setUserSettings(JSON.parse(storedSettings));
+    }
+    if (storedIdeas) {
+      setSavedIdeas(JSON.parse(storedIdeas));
     }
   }, []);
-  
-  const updateUserSettings = (newSettings: Partial<UserSettings>) => {
-    if (!user || !user.email) return;
-    setUserSettings(prevSettings => {
-        const updatedSettings = { ...prevSettings, ...newSettings };
-        localStorage.setItem(`ai-creativity-settings-${user.email}`, JSON.stringify(updatedSettings));
-        return updatedSettings;
-    });
-  };
 
-  const updateSavedIdeas = (newSavedIdeas: Idea[]) => {
-    setSavedIdeas(newSavedIdeas);
-    localStorage.setItem('saved-creative-ideas', JSON.stringify(newSavedIdeas));
+  // Persist saved ideas to local storage whenever they change
+  useEffect(() => {
+    localStorage.setItem('ai-creativity-saved-ideas', JSON.stringify(savedIdeas));
+  }, [savedIdeas]);
+
+  // Persist settings to local storage whenever they change
+  const updateUserSettings = (newSettings: Partial<UserSettings>) => {
+    setUserSettings(prevSettings => {
+      const updated = { ...prevSettings, ...newSettings };
+      localStorage.setItem('ai-creativity-settings', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const handleLogin = (userData: User) => {
     setUser(userData);
     localStorage.setItem('ai-creativity-user', JSON.stringify(userData));
-    // Load settings for the new user, or reset if none exist
-    const storedSettings = localStorage.getItem(`ai-creativity-settings-${userData.email}`);
-    if (storedSettings) {
-        setUserSettings(JSON.parse(storedSettings));
-    } else {
-        setUserSettings({});
-    }
-    setCurrentPage('welcome');
+    setPage('welcome');
   };
-  
+
   const handleLogout = () => {
     setUser(null);
-    setUserSettings({}); // Clear settings from state
     localStorage.removeItem('ai-creativity-user');
-    setCurrentPage('login');
-  }
-
-  const handleGoHome = () => {
-    setCurrentPage('welcome');
-  }
+    setPage('login');
+  };
 
   const renderPage = () => {
-    switch (currentPage) {
+    if (!user) return <LoginModule onLogin={handleLogin} />;
+    
+    switch(page) {
       case 'welcome':
-        return <Welcome onNavigate={setCurrentPage} />;
+        return <Welcome onNavigate={setPage} />;
       case 'creativeCorner':
-        return <CreativeCorner onGoHome={handleGoHome} savedIdeas={savedIdeas} setSavedIdeas={updateSavedIdeas} user={user} userSettings={userSettings} updateUserSettings={updateUserSettings} />;
+        return <CreativeCorner onGoHome={() => setPage('welcome')} savedIdeas={savedIdeas} setSavedIdeas={setSavedIdeas} user={user} userSettings={userSettings} updateUserSettings={updateUserSettings} />;
       case 'speechGeneration':
-        return <SpeechGenerationModule onGoHome={handleGoHome} savedIdeas={savedIdeas} setSavedIdeas={updateSavedIdeas} user={user} userSettings={userSettings} updateUserSettings={updateUserSettings} />;
+        return <SpeechGenerationModule onGoHome={() => setPage('welcome')} savedIdeas={savedIdeas} setSavedIdeas={setSavedIdeas} user={user} userSettings={userSettings} updateUserSettings={updateUserSettings} />;
       case 'imageGeneration':
-        return <ImageGenerationModule onGoHome={handleGoHome} user={user} userSettings={userSettings} updateUserSettings={updateUserSettings} />;
+        return <ImageGenerationModule onGoHome={() => setPage('welcome')} user={user} userSettings={userSettings} updateUserSettings={updateUserSettings} />;
       case 'assessment':
-        return <AssessmentModule onGoHome={handleGoHome} user={user} userSettings={userSettings} updateUserSettings={updateUserSettings} />;
+        return <AssessmentModule onGoHome={() => setPage('welcome')} user={user} userSettings={userSettings} updateUserSettings={updateUserSettings}/>;
       case 'designAssessment':
-        return <DesignAssessmentModule onGoHome={handleGoHome} user={user} />;
+        return <DesignAssessmentModule onGoHome={() => setPage('welcome')} user={user} />;
       case 'userGuide':
-        return <UserGuideModule onGoHome={handleGoHome} />;
+        return <UserGuide onGoHome={() => setPage('welcome')} />;
       case 'creator':
-        return <CreatorModule onGoHome={handleGoHome} />;
-      case 'login':
+        return <CreatorInfo onGoHome={() => setPage('welcome')} />;
       default:
-        return (
-          <div className="min-h-screen flex items-center justify-center p-4">
-            <LoginModule onLogin={handleLogin} />
-          </div>
-        );
+        return <Welcome onNavigate={setPage} />;
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      {currentPage !== 'login' && <Header onGoHome={handleGoHome} user={user?.user} onLogout={handleLogout} />}
-      <main className="flex-grow">
+      <Header onGoHome={() => setPage('welcome')} user={user?.user} onLogout={handleLogout} />
+      <main className="flex-grow flex items-center justify-center p-4">
         {renderPage()}
       </main>
       <Footer />
@@ -2880,5 +2699,5 @@ const App = () => {
   );
 };
 
-const root = ReactDOM.createRoot(document.getElementById('root')!);
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<App />);
