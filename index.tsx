@@ -1,7 +1,6 @@
 
 
 import { GoogleGenAI, Type, Modality } from '@google/genai';
-// FIX: Import React to make the `React` namespace available for types like React.FormEvent.
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom/client';
 
@@ -87,33 +86,60 @@ const blobToBase64 = (blob: Blob): Promise<{ base64: string, mimeType: string }>
 };
 
 const getApiErrorMessage = (error: any): string => {
+    // For debugging, we can log the raw error object to the console
+    console.error("AI API Error:", error);
+
     let combinedMessage = '';
 
-    if (typeof error === 'string') {
-        combinedMessage = error;
-    } else if (error instanceof Error) {
-        // Standard Error object
+    if (error instanceof Error) {
         combinedMessage = error.message;
+        // Specifically catch browser-level network errors from fetch()
+        if (error.name === 'TypeError' && error.message.toLowerCase().includes('failed to fetch')) {
+            return 'เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ตของคุณแล้วลองอีกครั้ง';
+        }
+    } else if (typeof error === 'string') {
+        combinedMessage = error;
     } else if (typeof error === 'object' && error !== null) {
-        // Handle custom error objects, potentially from APIs
-        // Combine multiple possible properties into one string for a comprehensive check
+        // Attempt to extract a meaningful message from a potential API error object
         combinedMessage = [
             error.message,
             error.error?.message,
-            // As a fallback, stringify the whole object to catch error codes/statuses
-            // that might be top-level properties.
-            JSON.stringify(error) 
-        ].filter(Boolean).join(' '); // filter(Boolean) removes null/undefined/empty strings
+            // In case of complex nested errors, stringify for inspection
+            JSON.stringify(error)
+        ].filter(Boolean).join(' ');
     }
 
     const lowerCaseMessage = combinedMessage.toLowerCase();
 
+    // 1. Quota Errors
     if (lowerCaseMessage.includes('quota') || lowerCaseMessage.includes('resource_exhausted') || lowerCaseMessage.includes('429')) {
-        return 'โควต้าการใช้งาน API ถึงขีดจำกัดแล้ว (อาจเป็นต่อนาทีหรือต่อวัน) โปรดรอสักครู่แล้วลองอีกครั้ง หรือตรวจสอบแผนการใช้งานของคุณ';
+        return 'โควต้าการใช้งาน API ถึงขีดจำกัดแล้ว โปรดรอประมาณ 1 นาทีแล้วลองอีกครั้ง';
+    }
+
+    // 2. API Key Errors
+    if (lowerCaseMessage.includes('api key not valid') || lowerCaseMessage.includes('permission denied')) {
+        return 'API Key ไม่ถูกต้องหรือถูกปฏิเสธการเข้าถึง โปรดติดต่อผู้ดูแลระบบ';
+    }
+
+    // 3. Invalid Response/Parsing Errors
+    // These can happen if the AI doesn't return valid JSON when it's supposed to.
+    if (error instanceof SyntaxError || lowerCaseMessage.includes('unexpected token') || lowerCaseMessage.includes('json parse')) {
+        return 'AI ตอบกลับในรูปแบบที่ไม่คาดคิดหรือไม่สมบูรณ์ ทำให้ไม่สามารถประมวลผลได้ โปรดลองอีกครั้ง';
     }
     
-    // A more generic error for other API issues
-    return 'เกิดข้อผิดพลาดในการสื่อสารกับ AI โปรดลองอีกครั้งในภายหลัง';
+    // 4. Content safety blocking
+    if (lowerCaseMessage.includes('finishreason: safety') || lowerCaseMessage.includes('safety policy')) {
+        return 'คำขอของคุณถูกบล็อกเนื่องจากนโยบายความปลอดภัย โปรดปรับเปลี่ยนคำสั่งของคุณ';
+    }
+    
+    // 5. General Network/Server errors (if not caught by TypeError above)
+    if (lowerCaseMessage.includes('network error') || lowerCaseMessage.includes('server error') || lowerCaseMessage.includes('500')) {
+        return 'เซิร์ฟเวอร์ AI เกิดข้อผิดพลาดชั่วคราว โปรดลองอีกครั้งในภายหลัง';
+    }
+
+    // 6. Generic fallback error
+    // This is a catch-all for anything not identified above.
+    return 'เกิดข้อผิดพลาดที่ไม่คาดคิดในการสื่อสารกับ AI โปรดลองอีกครั้งในภายหลัง';
 };
 
 
@@ -1959,7 +1985,6 @@ const DesignAssessmentModule = ({ onGoHome, user }) => {
       const files = event.target.files;
       if (files && files.length > 0) {
           setError('');
-          // FIX: Explicitly type `file` as `File` to resolve property access errors on `unknown`.
           const newImagesPromises = Array.from(files).map((file: File) => {
               if (!file.type.startsWith('image/')) {
                   console.warn(`Skipping non-image file: ${file.name}`);
@@ -2110,7 +2135,6 @@ const DesignAssessmentModule = ({ onGoHome, user }) => {
     if (!assessmentResult) return null;
 
     const scores = assessmentResult.scores;
-    // FIX: Explicitly cast score properties to number to handle cases where TS infers them as `unknown`.
     const averageScore = ((scores.visualAppeal as number) + (scores.usabilityClarity as number) + (scores.originality as number) + (scores.alignmentWithGoal as number) + (scores.designComposition as number)) / 5;
     const radius = 52;
     const circumference = 2 * Math.PI * radius;
@@ -2171,7 +2195,6 @@ const DesignAssessmentModule = ({ onGoHome, user }) => {
                       <span className="font-bold text-cyan-400">{value} / 10</span>
                     </div>
                     <div className="w-full bg-slate-700 rounded-full h-2.5">
-                      {/* FIX: Explicitly cast `value` to number to prevent arithmetic operation errors. */}
                       <div className="bg-gradient-to-r from-emerald-400 to-green-500 h-2.5 rounded-full" style={{ width: `${(value as number) * 10}%` }}></div>
                     </div>
                   </div>
