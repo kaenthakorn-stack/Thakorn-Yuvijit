@@ -23,6 +23,7 @@ type ScriptScene = {
   cameraMovement: string;
   visualDescription: string;
   audio: string;
+  dialogue: string;
   approxDuration: string;
 };
 
@@ -67,6 +68,24 @@ type UserSettings = {
   assessmentMediaType?: string;
   creativeAudience?: string;
   creativeGoal?: string;
+};
+
+type VideoEditingPlan = {
+  structureSummary: string;
+  shotList: ShotDetail[];
+  additionalSuggestions: {
+    music: string;
+    colorGrading: string;
+  };
+};
+
+type ShotDetail = {
+  timecode: string;
+  clipSource: string;
+  visualDescription: string;
+  editingNote: string;
+  textGraphicSuggestion: string;
+  audioSuggestion: string;
 };
 
 
@@ -265,6 +284,22 @@ const LoginModule = ({ onLogin }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    // Pre-fill the form with the last logged-in user's details for convenience
+    const lastUser = localStorage.getItem('ai-creativity-last-user');
+    if (lastUser) {
+      try {
+        const userData: User = JSON.parse(lastUser);
+        if (userData && userData.user && userData.email) {
+          setUser(userData.user);
+          setEmail(userData.email);
+        }
+      } catch (e) {
+        console.error("Failed to parse last user data:", e);
+      }
+    }
+  }, []); // Run only once on mount
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user.trim() || !email.trim()) {
@@ -372,6 +407,12 @@ const Welcome = ({ onNavigate }) => (
                 className="bg-gradient-to-r from-emerald-500 to-green-500 hover:shadow-emerald-500/30 text-white font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 hover:-translate-y-1 shadow-lg"
             >
                 ประเมินผลงานการออกแบบ
+            </button>
+            <button
+                onClick={() => onNavigate('videoEditorAssistant')}
+                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-purple-500/30 text-white font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105 hover:-translate-y-1 shadow-lg"
+            >
+                ผู้ช่วยตัดต่อวิดีโอ
             </button>
         </div>
         <div className="absolute bottom-6 right-6 flex items-center gap-3">
@@ -614,12 +655,21 @@ const CreativeCorner = ({ onGoHome, savedIdeas, setSavedIdeas, user, userSetting
     
     enqueueApiRequest(async () => {
         try {
-            const prompt = `คุณคือมืออาชีพด้านการเขียนสคริปต์ภาษาไทย สร้างสคริปต์สำหรับถ่ายทำวิดีโอสั้นจากข้อมูลไอเดียต่อไปนี้ โดยให้ผลลัพธ์ทั้งหมดเป็นภาษาไทย
+            const prompt = `คุณคือผู้กำกับและนักเขียนบทมืออาชีพ สร้างสคริปต์สำหรับถ่ายทำวิดีโอสั้นที่มีรายละเอียดสูงและนำไปใช้งานได้จริง จากข้อมูลไอเดียต่อไปนี้ โดยให้ผลลัพธ์ทั้งหมดเป็นภาษาไทย
             - ชื่อคอนเซ็ปต์: "${idea.conceptName}"
             - ฮุค: "${idea.hook}"
             - พล็อตเรื่อง: "${idea.shortPlot}"
             - แนวทางภาพและเสียง: "${idea.visualAudioDirection}"
-            สร้างสคริปต์โดยละเอียดสำหรับถ่ายทำ โดยผลลัพธ์ต้องเป็น JSON array ของแต่ละฉาก และค่าของ property ทั้งหมด (scene, shot, cameraAngle, cameraMovement, visualDescription, audio, approxDuration) ต้องเป็นภาษาไทย`;
+            
+            สร้างสคริปต์ที่สมบูรณ์ โดยผลลัพธ์ต้องเป็น JSON array ของแต่ละฉาก แต่ละฉากต้องมีข้อมูลครบถ้วนดังนี้:
+            - scene: หมายเลขฉาก (Scene Number)
+            - shot: หมายเลขช็อต (Shot Number)
+            - cameraAngle: มุมกล้องอย่างละเอียด (เช่น Close-up, Medium Shot, Long Shot, POV)
+            - cameraMovement: การเคลื่อนกล้อง (เช่น Pan, Tilt, Zoom in, Static)
+            - visualDescription: คำอธิบายภาพที่ชัดเจน บอกเล่าการกระทำ, การแสดงออกของตัวละคร, และสภาพแวดล้อม
+            - audio: คำอธิบายเสียงประกอบที่เจาะจง (เช่น "เสียงลมพัดเบาๆ", "ดนตรีประกอบแนว Lo-fi จังหวะสบายๆ")
+            - dialogue: บทพูดที่ตัวละครพูดจริงๆ (หากไม่มีบทพูด ให้ระบุว่า "ไม่มี")
+            - approxDuration: ระยะเวลาโดยประมาณของช็อต (เช่น "3 วินาที")`;
             
             const response = await ai.models.generateContent({
                 model: 'gemini-2.5-flash',
@@ -639,10 +689,11 @@ const CreativeCorner = ({ onGoHome, savedIdeas, setSavedIdeas, user, userSetting
                                 cameraAngle: { type: Type.STRING },
                                 cameraMovement: { type: Type.STRING },
                                 visualDescription: { type: Type.STRING },
-                                audio: { type: Type.STRING },
+                                audio: { type: Type.STRING, description: "เสียงประกอบ เช่น SFX, ดนตรี" },
+                                dialogue: { type: Type.STRING, description: "บทพูดของตัวละคร" },
                                 approxDuration: { type: Type.STRING },
                             },
-                            required: ['scene', 'shot', 'cameraAngle', 'cameraMovement', 'visualDescription', 'audio', 'approxDuration'],
+                            required: ['scene', 'shot', 'cameraAngle', 'cameraMovement', 'visualDescription', 'audio', 'dialogue', 'approxDuration'],
                             },
                         },
                         },
@@ -713,7 +764,7 @@ const CreativeCorner = ({ onGoHome, savedIdeas, setSavedIdeas, user, userSetting
     
     window.speechSynthesis.cancel();
 
-    const textToSpeak = `ภาพ: ${scene.visualDescription} เสียง: ${scene.audio}`;
+    const textToSpeak = `ภาพ: ${scene.visualDescription}. เสียง: ${scene.audio}. บทพูด: ${scene.dialogue}`;
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     
     const thaiVoice = voices.find(voice => voice.lang === 'th-TH');
@@ -745,6 +796,7 @@ const CreativeCorner = ({ onGoHome, savedIdeas, setSavedIdeas, user, userSetting
         fileContent += `Camera Movement: ${scene.cameraMovement}\n`;
         fileContent += `Descript: ${scene.visualDescription}\n`;
         fileContent += `Sound: ${scene.audio}\n`;
+        fileContent += `Dialogue: ${scene.dialogue}\n`;
         fileContent += `Time: ${scene.approxDuration}\n\n`;
     });
     
@@ -958,6 +1010,19 @@ const CreativeCorner = ({ onGoHome, savedIdeas, setSavedIdeas, user, userSetting
                           <p className="text-slate-300 mt-1">{scene.audio}</p>
                         </div>
                       </div>
+
+                       {/* Dialogue */}
+                      {scene.dialogue && scene.dialogue.trim().toLowerCase() !== 'ไม่มี' && (
+                        <div className="flex items-start gap-3">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clipRule="evenodd" />
+                          </svg>
+                          <div className="flex-1">
+                            <p className="font-semibold text-slate-300 uppercase tracking-wider text-xs">Dialogue</p>
+                            <p className="text-slate-300 mt-1 italic">"{scene.dialogue}"</p>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Camera Details */}
                       <div className="flex items-start gap-3">
@@ -2135,7 +2200,9 @@ const DesignAssessmentModule = ({ onGoHome, user }) => {
     if (!assessmentResult) return null;
 
     const scores = assessmentResult.scores;
-    const averageScore = ((scores.visualAppeal as number) + (scores.usabilityClarity as number) + (scores.originality as number) + (scores.alignmentWithGoal as number) + (scores.designComposition as number)) / 5;
+// FIX: The following lines were causing type errors due to potential ambiguity after JSON.parse.
+// Replaced the manual summation of properties with a more robust and type-safe method using Object.values and reduce.
+    const averageScore = (Object.values(scores).reduce((a, b) => a + b, 0)) / 5;
     const radius = 52;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (averageScore / 10) * circumference;
@@ -2188,14 +2255,16 @@ const DesignAssessmentModule = ({ onGoHome, user }) => {
             <div>
               <h4 className="text-xl font-semibold mb-4 text-gray-200">คะแนนตามเกณฑ์</h4>
               <div className="space-y-4">
-                {Object.entries(assessmentResult.scores).map(([key, value]) => (
+{/* FIX: Replaced Object.entries with a typed Object.keys mapping.
+This resolves a type inference issue where the 'value' from Object.entries was not being correctly identified as a number, causing an error in the arithmetic operation for the width style. */}
+                {(Object.keys(scores) as Array<keyof typeof scores>).map((key) => (
                   <div key={key}>
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-slate-300">{scoreLabels[key as keyof typeof scoreLabels]}</span>
-                      <span className="font-bold text-cyan-400">{value} / 10</span>
+                      <span className="text-slate-300">{scoreLabels[key]}</span>
+                      <span className="font-bold text-cyan-400">{scores[key]} / 10</span>
                     </div>
                     <div className="w-full bg-slate-700 rounded-full h-2.5">
-                      <div className="bg-gradient-to-r from-emerald-400 to-green-500 h-2.5 rounded-full" style={{ width: `${(value as number) * 10}%` }}></div>
+                      <div className="bg-gradient-to-r from-emerald-400 to-green-500 h-2.5 rounded-full" style={{ width: `${scores[key] * 10}%` }}></div>
                     </div>
                   </div>
                 ))}
@@ -2276,6 +2345,360 @@ const DesignAssessmentModule = ({ onGoHome, user }) => {
       {renderAssessmentResult()}
     </div>
   );
+};
+
+const VideoEditorAssistantModule = ({ onGoHome, user }) => {
+    const [videoFiles, setVideoFiles] = useState<{ file: File, url: string }[]>([]);
+    const [goal, setGoal] = useState('');
+    const [audience, setAudience] = useState('');
+    const [mood, setMood] = useState('');
+    const [editingStyle, setEditingStyle] = useState('');
+    const [plan, setPlan] = useState<VideoEditingPlan | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [processingMessage, setProcessingMessage] = useState('');
+    const [error, setError] = useState('');
+    const planIteration = useRef(0);
+    const isMounted = useRef(true);
+
+    useEffect(() => {
+        isMounted.current = true;
+        // Clean up object URLs on unmount
+        return () => {
+            isMounted.current = false;
+            videoFiles.forEach(vf => URL.revokeObjectURL(vf.url));
+        };
+    }, [videoFiles]);
+
+    const extractFramesFromVideo = (videoFile: File, maxFrames = 5): Promise<{ base64: string, mimeType: string }[]> => {
+        return new Promise((resolve, reject) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            const videoUrl = URL.createObjectURL(videoFile);
+            video.src = videoUrl;
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            const frames: { base64: string, mimeType: string }[] = [];
+
+            video.onloadeddata = async () => {
+                const duration = video.duration;
+                if (duration === 0 || !isFinite(duration)) {
+                    URL.revokeObjectURL(videoUrl);
+                    reject(new Error("ไม่สามารถอ่านระยะเวลาของวิดีโอได้"));
+                    return;
+                }
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const interval = duration / maxFrames;
+
+                for (let i = 0; i < maxFrames; i++) {
+                    const time = i * interval + 0.1; // Add small offset to avoid issues at time 0
+                    video.currentTime = Math.min(time, duration);
+                    await new Promise(r => { video.onseeked = r; video.oncanplay = r; });
+
+                    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    const base64 = dataUrl.split(',')[1];
+                    frames.push({ base64, mimeType: 'image/jpeg' });
+                }
+                URL.revokeObjectURL(videoUrl);
+                resolve(frames);
+            };
+            video.onerror = (e) => {
+                console.error("Video error event:", e);
+                let userMessage = "เกิดข้อผิดพลาดในการโหลดวิดีโอ";
+                if (video.error) {
+                    console.error("Video Error Details:", video.error);
+                    switch (video.error.code) {
+                        case video.error.MEDIA_ERR_DECODE:
+                            userMessage = "ไม่สามารถถอดรหัสวิดีโอได้ ไฟล์อาจเสียหายหรือใช้รูปแบบ (codec) ที่เบราว์เซอร์ไม่รองรับ";
+                            break;
+                        case video.error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                            userMessage = "รูปแบบวิดีโอไม่รองรับ โปรดลองใช้วิดีโอในรูปแบบ MP4 หรือ WebM";
+                            break;
+                        case video.error.MEDIA_ERR_NETWORK:
+                            userMessage = "เกิดข้อผิดพลาดเกี่ยวกับเครือข่ายขณะโหลดวิดีโอ";
+                            break;
+                        case video.error.MEDIA_ERR_ABORTED:
+                             userMessage = "การโหลดวิดีโอถูกยกเลิก";
+                             break;
+                        default:
+                            userMessage = `เกิดข้อผิดพลาดที่ไม่รู้จัก: ${video.error.message || 'โปรดลองใช้ไฟล์อื่น'}`;
+                    }
+                }
+                URL.revokeObjectURL(videoUrl);
+                reject(new Error(userMessage));
+            };
+        });
+    };
+
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = event.target.files;
+        if (files) {
+            const newVideoFiles = Array.from(files)
+                .filter(file => file.type.startsWith('video/'))
+                .map(file => ({ file, url: URL.createObjectURL(file) }));
+
+            if (files.length > 0 && newVideoFiles.length === 0) {
+                 setError("ไฟล์ที่เลือกไม่ใช่วิดีโอ");
+            } else {
+                 setError('');
+                 setVideoFiles(prev => [...prev, ...newVideoFiles]);
+            }
+        }
+    };
+
+    const handleRemoveVideo = (indexToRemove: number) => {
+        setVideoFiles(prev => {
+            const newFiles = [...prev];
+            const removed = newFiles.splice(indexToRemove, 1);
+            URL.revokeObjectURL(removed[0].url);
+            return newFiles;
+        });
+    };
+
+    const handleGeneratePlan = () => {
+        if (videoFiles.length === 0 || !goal.trim() || !audience.trim() || !mood.trim()) {
+            setError('กรุณาอัปโหลดวิดีโอและกรอกข้อมูลให้ครบทุกช่อง');
+            return;
+        }
+        setLoading(true);
+        setProcessingMessage('กำลังประมวลผลวิดีโอ...');
+        setError('');
+        setPlan(null);
+        planIteration.current += 1;
+        const startTime = Date.now();
+        const promptData = { goal, audience, mood, editingStyle, fileNames: videoFiles.map(f => f.file.name) };
+
+        enqueueApiRequest(async () => {
+            try {
+                const allFramesPromises = videoFiles.map(vf => extractFramesFromVideo(vf.file));
+                const framesByVideo = await Promise.all(allFramesPromises);
+                
+                if (!isMounted.current) return;
+                setProcessingMessage('AI กำลังวางแผนการตัดต่อ...');
+
+                const prompt = `คุณคือผู้กำกับและนักตัดต่อวิดีโอผู้เชี่ยวชาญ สร้างแผนการตัดต่อวิดีโอ (Editing Plan) จากคลิปวิดีโอที่แนบมาและข้อมูลต่อไปนี้ โดยให้ผลลัพธ์ทั้งหมดเป็นภาษาไทย
+                - เป้าหมายของวิดีโอ: "${goal}"
+                - กลุ่มเป้าหมาย: "${audience}"
+                - อารมณ์/โทนของวิดีโอ: "${mood}"
+                - แนวทาง/สไตล์การตัดต่อ (ถ้ามี): "${editingStyle || 'AI เลือกให้เหมาะสม'}"
+                
+                โปรดวิเคราะห์เฟรมภาพจากคลิปวิดีโอต่าง ๆ (ระบุตามชื่อไฟล์) และสร้างแผนการตัดต่อที่ละเอียด มีการลำดับเรื่องราวที่น่าสนใจ, แนะนำจังหวะการตัด, ข้อความ/กราฟิก, และเสียงประกอบ
+
+                โปรดตอบกลับเป็นรูปแบบ JSON เท่านั้น`;
+                
+                let contentParts: any[] = [{ text: prompt }];
+                framesByVideo.forEach((frames, index) => {
+                    const fileName = videoFiles[index].file.name;
+                    contentParts.push({ text: `\n\n[เริ่มต้นเฟรมจากไฟล์: ${fileName}]` });
+                    frames.forEach(frame => {
+                        contentParts.push({ inlineData: { data: frame.base64, mimeType: frame.mimeType } });
+                    });
+                    contentParts.push({ text: `[สิ้นสุดเฟรมจากไฟล์: ${fileName}]` });
+                });
+
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: { parts: contentParts },
+                    config: {
+                        responseMimeType: 'application/json',
+                        responseSchema: {
+                            type: Type.OBJECT,
+                            properties: {
+                                structureSummary: { type: Type.STRING, description: "สรุปโครงสร้างและการเล่าเรื่องโดยรวม" },
+                                shotList: {
+                                    type: Type.ARRAY,
+                                    items: {
+                                        type: Type.OBJECT,
+                                        properties: {
+                                            timecode: { type: Type.STRING, description: "ช่วงเวลาโดยประมาณ เช่น 0:00-0:05" },
+                                            clipSource: { type: Type.STRING, description: "ชื่อไฟล์คลิปต้นฉบับที่ใช้" },
+                                            visualDescription: { type: Type.STRING, description: "คำอธิบายภาพในช็อตนี้" },
+                                            editingNote: { type: Type.STRING, description: "คำแนะนำการตัดต่อ, จังหวะ, transition" },
+                                            textGraphicSuggestion: { type: Type.STRING, description: "ข้อความหรือกราฟิกที่แนะนำ (ถ้ามี)" },
+                                            audioSuggestion: { type: Type.STRING, description: "คำแนะนำด้านเสียง, เพลง, หรือ SFX" }
+                                        },
+                                        required: ['timecode', 'clipSource', 'visualDescription', 'editingNote', 'textGraphicSuggestion', 'audioSuggestion']
+                                    }
+                                },
+                                additionalSuggestions: {
+                                    type: Type.OBJECT,
+                                    properties: {
+                                        music: { type: Type.STRING, description: "แนวเพลงหรือดนตรีประกอบที่แนะนำ" },
+                                        colorGrading: { type: Type.STRING, description: "คำแนะนำการปรับแก้สี (Color Grading)" }
+                                    },
+                                    required: ['music', 'colorGrading']
+                                }
+                            },
+                            required: ['structureSummary', 'shotList', 'additionalSuggestions']
+                        }
+                    }
+                });
+
+                if (isMounted.current) {
+                    const result = JSON.parse(response.text) as VideoEditingPlan;
+                    setPlan(result);
+                    logInteraction(user, {
+                        task: 'Video Editing Plan Generation',
+                        status: 'Success',
+                        durationMs: Date.now() - startTime,
+                        prompt: promptData,
+                        result: result,
+                        iteration: planIteration.current,
+                        collaborationPattern: 'AI-assisted'
+                    });
+                }
+
+            } catch (err) {
+                console.error(err);
+                const friendlyError = getApiErrorMessage(err);
+                logInteraction(user, {
+                    task: 'Video Editing Plan Generation',
+                    status: 'Error',
+                    durationMs: Date.now() - startTime,
+                    prompt: promptData,
+                    result: err.message,
+                    iteration: planIteration.current,
+                    collaborationPattern: 'AI-assisted'
+                });
+                if (isMounted.current) {
+                    setError(friendlyError);
+                }
+            } finally {
+                if (isMounted.current) {
+                    setLoading(false);
+                    setProcessingMessage('');
+                }
+            }
+        });
+    };
+
+    return (
+        <div className="container mx-auto p-4 space-y-8 animate-fade-in">
+            <section className="bg-slate-900/60 backdrop-blur-lg border border-slate-700/80 p-6 rounded-2xl shadow-xl">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold text-cyan-400">ผู้ช่วยตัดต่อวิดีโอ (Video Editor Assistant)</h2>
+                    <button onClick={onGoHome} className="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition flex items-center space-x-2 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                        </svg>
+                        <span>หน้าหลัก</span>
+                    </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                    <div className="space-y-4">
+                        <input type="text" value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="เป้าหมายของวิดีโอ" className="w-full bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+                        <input type="text" value={audience} onChange={(e) => setAudience(e.target.value)} placeholder="กลุ่มเป้าหมาย" className="w-full bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+                        <select value={mood} onChange={(e) => setMood(e.target.value)} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                            <option value="" disabled>-- เลือกอารมณ์/โทนของวิดีโอ --</option>
+                            <option value="สนุกสนาน / ร่าเริง">สนุกสนาน / ร่าเริง</option>
+                            <option value="ตื่นเต้น / เร้าใจ">ตื่นเต้น / เร้าใจ</option>
+                            <option value="อบอุ่น / ซึ้งใจ">อบอุ่น / ซึ้งใจ</option>
+                            <option value="สงบ / ผ่อนคลาย">สงบ / ผ่อนคลาย</option>
+                            <option value="ลึกลับ / น่าค้นหา">ลึกลับ / น่าค้นหา</option>
+                            <option value="จริงจัง / เป็นทางการ">จริงจัง / เป็นทางการ</option>
+                            <option value="ดราม่า / เข้มข้น">ดราม่า / เข้มข้น</option>
+                            <option value="สร้างแรงบันดาลใจ">สร้างแรงบันดาลใจ</option>
+                            <option value="ตลกขบขัน">ตลกขบขัน</option>
+                        </select>
+                        <select value={editingStyle} onChange={(e) => setEditingStyle(e.target.value)} className="w-full bg-slate-800 p-3 rounded-lg border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                            <option value="">AI เลือกให้เหมาะสม (แนะนำ)</option>
+                            <option value="ตัดต่อเร็ว / กระชับ">ตัดต่อเร็ว / กระชับ (Fast-paced)</option>
+                            <option value="ตัดต่อช้า / ละมุน">ตัดต่อช้า / ละมุน (Cinematic)</option>
+                            <option value="สไตล์สารคดี">สไตล์สารคดี (Documentary)</option>
+                            <option value="สไตล์ Vlog">สไตล์ Vlog</option>
+                            <option value="เน้นกราฟิกและเอฟเฟกต์">เน้นกราฟิกและเอฟเฟกต์ (Motion Graphics)</option>
+                            <option value="เรียบง่าย / มินิมอล">เรียบง่าย / มินิมอล (Minimalist)</option>
+                            <option value="สไตล์วินเทจ / ย้อนยุค">สไตล์วินเทจ / ย้อนยุค (Vintage)</option>
+                        </select>
+                    </div>
+                    <div className="flex flex-col bg-slate-800/40 rounded-lg p-4 space-y-4">
+                        {videoFiles.length > 0 && (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-48 overflow-y-auto">
+                                {videoFiles.map((vf, index) => (
+                                    <div key={index} className="relative group aspect-video">
+                                        <video src={vf.url} className="w-full h-full object-cover rounded-md bg-black" />
+                                        <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity p-1">
+                                            <button onClick={() => handleRemoveVideo(index)} className="text-white bg-red-600 hover:bg-red-700 rounded-full p-1.5" aria-label={`ลบคลิป ${index + 1}`}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" />
+                                                </svg>
+                                            </button>
+                                            <p className="text-white text-xs mt-1 text-center truncate w-full" title={vf.file.name}>{vf.file.name}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <label htmlFor="video-upload" className="cursor-pointer w-full border-2 border-dashed border-slate-600 hover:border-cyan-500 transition-colors rounded-lg p-6 flex flex-col items-center justify-center text-center text-slate-400">
+                             <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mb-2" viewBox="0 0 20 20" fill="currentColor">
+                               <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 001.553.832l3-2a1 1 0 000-1.664l-3-2z" />
+                             </svg>
+                             <span className="font-semibold">อัปโหลดคลิปวิดีโอ</span>
+                             <span className="text-xs mt-1">สามารถเลือกได้หลายไฟล์</span>
+                        </label>
+                        <p className="text-xs text-slate-500 text-center -mt-3">แนะนำ: ใช้ไฟล์ MP4 เพื่อความเข้ากันได้สูงสุด</p>
+                        <input id="video-upload" type="file" className="hidden" accept="video/*" multiple onChange={handleFileChange} />
+                    </div>
+                </div>
+                <button onClick={handleGeneratePlan} disabled={loading} className="w-full bg-gradient-to-r from-purple-500 to-pink-600 hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition disabled:bg-slate-600 flex items-center justify-center h-10">
+                    {loading ? <div className="flex items-center gap-2"><div className="loader !w-6 !h-6 !border-2"></div><span>{processingMessage}</span></div> : 'ให้ AI แนะนำการตัดต่อ'}
+                </button>
+                {error && <p className="text-red-400 mt-2 text-center">{error}</p>}
+            </section>
+            
+            {plan && (
+                <section className="bg-slate-900/60 backdrop-blur-lg border border-slate-700/80 p-6 rounded-2xl shadow-xl animate-fade-in space-y-6">
+                    <div>
+                        <h3 className="text-2xl font-bold text-cyan-400 mb-2">แผนการตัดต่อโดย AI</h3>
+                        <p className="text-slate-300 bg-slate-800/50 p-4 rounded-lg">{plan.structureSummary}</p>
+                    </div>
+                    <div className="space-y-4">
+                        {plan.shotList.map((shot, index) => (
+                            <div key={index} className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                                <h4 className="text-lg font-bold text-cyan-400 tracking-wide">
+                                    {shot.timecode} <span className="text-sm font-normal text-slate-400">(จาก: {shot.clipSource})</span>
+                                </h4>
+                                <div className="mt-4 border-t border-slate-700 pt-4 space-y-4 text-sm">
+                                     <div className="flex items-start gap-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" /></svg>
+                                        <div><p className="font-semibold text-slate-300 uppercase tracking-wider text-xs">Visual</p><p className="text-slate-300 mt-1">{shot.visualDescription}</p></div>
+                                    </div>
+                                     <div className="flex items-start gap-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 01-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                        <div><p className="font-semibold text-slate-300 uppercase tracking-wider text-xs">Editing</p><p className="text-slate-300 mt-1">{shot.editingNote}</p></div>
+                                    </div>
+                                    {shot.textGraphicSuggestion.toLowerCase() !== 'ไม่มี' && shot.textGraphicSuggestion.trim() !== '' && (
+                                     <div className="flex items-start gap-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-amber-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.243 3.03a1 1 0 01.757 1.628L6.002 10l3.998 5.342A1 1 0 018.998 17H6a1 1 0 01-.928-.629l-4-8A1 1 0 012 7h2.236a1 1 0 01.928.629L6.002 10l2.24-2.987a1 1 0 011.001-.353zM14 7a1 1 0 011 1v4a1 1 0 11-2 0V8a1 1 0 011-1z" clipRule="evenodd" /></svg>
+                                        <div><p className="font-semibold text-slate-300 uppercase tracking-wider text-xs">Text/Graphics</p><p className="text-slate-300 mt-1">{shot.textGraphicSuggestion}</p></div>
+                                    </div>
+                                    )}
+                                     <div className="flex items-start gap-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-fuchsia-400 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414z" clipRule="evenodd" /><path d="M16.071 5.071a1 1 0 011.414 0 5.98 5.98 0 010 9.858 1 1 0 11-1.414-1.414 3.98 3.98 0 000-7.03z" /></svg>
+                                        <div><p className="font-semibold text-slate-300 uppercase tracking-wider text-xs">Audio</p><p className="text-slate-300 mt-1">{shot.audioSuggestion}</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-cyan-400 mb-2">ข้อเสนอแนะเพิ่มเติม</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           <div className="bg-slate-800/50 p-4 rounded-lg">
+                              <h5 className="font-bold text-green-400 mb-2">ดนตรีและเสียงประกอบ</h5>
+                              <p className="text-slate-300 whitespace-pre-wrap">{plan.additionalSuggestions.music}</p>
+                            </div>
+                            <div className="bg-slate-800/50 p-4 rounded-lg">
+                              <h5 className="font-bold text-yellow-400 mb-2">การปรับแก้สี (Color Grading)</h5>
+                              <p className="text-slate-300 whitespace-pre-wrap">{plan.additionalSuggestions.colorGrading}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
+        </div>
+    );
 };
 
 const ImageGenerationModule = ({ onGoHome, user, userSettings, updateUserSettings }) => {
@@ -2598,6 +3021,14 @@ const UserGuide = ({ onGoHome }) => (
                         <li><strong>ผลลัพธ์:</strong> ได้รับการประเมินใน 5 ด้านหลักของการออกแบบ พร้อมจุดแข็งและข้อเสนอแนะ</li>
                     </ul>
                 </div>
+                 <div>
+                    <h3 className="text-xl font-bold text-purple-300 mb-2">6. ผู้ช่วยตัดต่อวิดีโอ (Video Editor Assistant)</h3>
+                    <p>อัปโหลดคลิปวิดีโอของคุณ แล้วให้ AI ช่วยวางแผนการตัดต่อทั้งหมด ตั้งแต่การลำดับเรื่องไปจนถึงการใส่เสียงและกราฟิก</p>
+                     <ul className="list-disc list-inside mt-2 space-y-1 pl-4 text-slate-400">
+                        <li><strong>วิธีใช้:</strong> อัปโหลดคลิปวิดีโอ (รองรับหลายไฟล์), ระบุเป้าหมาย, กลุ่มเป้าหมาย, และโทนของวิดีโอ</li>
+                        <li><strong>ผลลัพธ์:</strong> AI จะสร้างแผนการตัดต่อแบบละเอียด (Shot List) พร้อมคำแนะนำเรื่องดนตรีและการปรับสี</li>
+                    </ul>
+                </div>
                  <div className="border-t border-slate-700 pt-4">
                     <h3 className="text-lg font-bold text-slate-300 mb-2">ข้อแนะนำทั่วไป</h3>
                     <p className="text-slate-400">เนื่องจาก API มีโควต้าการใช้งานฟรีที่จำกัด (ประมาณ 1 ครั้งต่อนาที) หากกดปุ่มแล้วไม่มีอะไรเกิดขึ้น หรือขึ้นข้อความแจ้งเตือนโควต้า โปรดรอประมาณ 1 นาทีแล้วลองอีกครั้ง</p>
@@ -2677,6 +3108,8 @@ const App = () => {
   const handleLogin = (userData: User) => {
     setUser(userData);
     localStorage.setItem('ai-creativity-user', JSON.stringify(userData));
+    // Also save to 'last-user' to pre-fill the form next time
+    localStorage.setItem('ai-creativity-last-user', JSON.stringify(userData));
     setPage('welcome');
   };
 
@@ -2702,6 +3135,8 @@ const App = () => {
         return <AssessmentModule onGoHome={() => setPage('welcome')} user={user} userSettings={userSettings} updateUserSettings={updateUserSettings}/>;
       case 'designAssessment':
         return <DesignAssessmentModule onGoHome={() => setPage('welcome')} user={user} />;
+      case 'videoEditorAssistant':
+        return <VideoEditorAssistantModule onGoHome={() => setPage('welcome')} user={user} />;
       case 'userGuide':
         return <UserGuide onGoHome={() => setPage('welcome')} />;
       case 'creator':
